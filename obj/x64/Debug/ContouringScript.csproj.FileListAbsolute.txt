@@ -1,0 +1,26 @@
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\bin\debug\ContouringScript.exe.config
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\bin\debug\ContouringScript.exe
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\bin\debug\ContouringScript.pdb
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\bin\debug\VMS.TPS.Common.Model.API.dll
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\bin\debug\VMS.TPS.Common.Model.Types.dll
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\bin\debug\VMS.TPS.Common.Model.API.xml
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\bin\debug\VMS.TPS.Common.Model.Types.xml
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\obj\x64\Debug\ContouringScript.csproj.AssemblyReference.cache
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\obj\x64\Debug\ContouringScript.csproj.SuggestedBindingRedirects.cache
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\obj\x64\Debug\ContouringScript.csproj.CoreCompileInputs.cache
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\obj\x64\Debug\ContouringScript.csproj.CopyComplete
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\obj\x64\Debug\ContouringScript.exe
+C:\Users\michael\Documents\Eclipse Scripting API\Projects\ContouringScript\obj\x64\Debug\ContouringScript.pdb
+F:\ContouringScript\obj\x64\Debug\ContouringScript.csproj.AssemblyReference.cache
+F:\ContouringScript\obj\x64\Debug\ContouringScript.csproj.SuggestedBindingRedirects.cache
+F:\ContouringScript\obj\x64\Debug\ContouringScript.csproj.CoreCompileInputs.cache
+F:\ContouringScript\obj\x64\Debug\ContouringScript.exe
+F:\ContouringScript\obj\x64\Debug\ContouringScript.pdb
+F:\ContouringScript\bin\debug\ContouringScript.exe.config
+F:\ContouringScript\bin\debug\ContouringScript.exe
+F:\ContouringScript\bin\debug\ContouringScript.pdb
+F:\ContouringScript\bin\debug\VMS.TPS.Common.Model.API.dll
+F:\ContouringScript\bin\debug\VMS.TPS.Common.Model.Types.dll
+F:\ContouringScript\bin\debug\VMS.TPS.Common.Model.API.xml
+F:\ContouringScript\bin\debug\VMS.TPS.Common.Model.Types.xml
+F:\ContouringScript\obj\x64\Debug\ContouringScript.csproj.CopyComplete
