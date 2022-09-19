@@ -84,7 +84,7 @@ namespace ContouringScript
             Logger.WriteInfo("\tCroppedOrgansCreator:");
             var CroppedOrgansCreator = new CroppedOrgansCreator();
             CroppedOrgansCreator.Create();
-            //CroppedOrgansCreator.CropBodyByPTV(ringOuterMargin);
+            CroppedOrgansCreator.CropBodyByPTV(ringOuterMargin);
 
             Logger.WriteInfo("\tCleaner:");
             cleaner.RemoveUnnecessaryEmptyStructures();
