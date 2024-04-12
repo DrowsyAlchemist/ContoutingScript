@@ -24,3 +24,13 @@ F:\ContouringScript\bin\debug\VMS.TPS.Common.Model.Types.dll
 F:\ContouringScript\bin\debug\VMS.TPS.Common.Model.API.xml
 F:\ContouringScript\bin\debug\VMS.TPS.Common.Model.Types.xml
 F:\ContouringScript\obj\x64\Debug\ContouringScript.csproj.CopyComplete
+D:\Programming\GitHub\ContoutingScript\obj\x64\Debug\ContouringScript.csproj.AssemblyReference.cache
+D:\Programming\GitHub\ContoutingScript\obj\x64\Debug\ContouringScript.csproj.CoreCompileInputs.cache
+D:\Programming\GitHub\ContoutingScript\obj\x64\Debug\ContouringScript.exe
+D:\Programming\GitHub\ContoutingScript\obj\x64\Debug\ContouringScript.pdb
+D:\Programming\GitHub\ContoutingScript\bin\debug\ContouringScript.exe.config
+D:\Programming\GitHub\ContoutingScript\bin\debug\ContouringScript.exe
+D:\Programming\GitHub\ContoutingScript\bin\debug\ContouringScript.pdb
+D:\Programming\GitHub\ContoutingScript\bin\debug\VMS.TPS.Common.Model.API.xml
+D:\Programming\GitHub\ContoutingScript\bin\debug\VMS.TPS.Common.Model.Types.xml
+D:\Programming\GitHub\ContoutingScript\obj\x64\Debug\ContouringScript.csproj.CopyComplete

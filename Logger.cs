@@ -8,7 +8,7 @@ namespace ContouringScript
         private const ConsoleColor WarningColor = ConsoleColor.Yellow;
         private const ConsoleColor ErrorColor = ConsoleColor.Red;
 
-        public static bool IsDebugMode { get; set; } = false;
+        private static bool IsDebugMode => Config.IsDebugMode;
 
         public static void WriteInfo(string message)
         {
