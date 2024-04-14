@@ -1,4 +1,4 @@
-﻿namespace ContouringScript
+﻿namespace Contouring
 {
     public static class Config
     {

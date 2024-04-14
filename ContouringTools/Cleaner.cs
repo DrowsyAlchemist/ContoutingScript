@@ -2,7 +2,7 @@
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
-namespace ContouringScript
+namespace Contouring
 {
     public class Cleaner
     {
@@ -18,6 +18,7 @@ namespace ContouringScript
 
         public void RemoveUnnecessaryEmptyStructures()
         {
+            Logger.WriteInfo("\tCleaner: RemoveUnnecessaryEmptyStructures");
             Structure[] structuresToRemove = GetUnnecessaryEmptyStructures();
 
             if (structuresToRemove == null || structuresToRemove.Length == 0)
@@ -42,6 +43,7 @@ namespace ContouringScript
 
         public void CropStructuresByBody()
         {
+            Logger.WriteInfo("\tCleaner: CropStructuresByBody");
             CropByBody(Config.OrgansType, Config.OrganFromBodyMargin);
             CropByBody(Config.CtvType, Config.TargetFromBody);
             Application.SaveModifications();

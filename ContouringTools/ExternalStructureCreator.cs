@@ -1,7 +1,7 @@
 ﻿using System;
 using VMS.TPS.Common.Model.API;
 
-namespace ContouringScript
+namespace Contouring
 {
     public class ExternalStructureCreator
     {
@@ -14,6 +14,8 @@ namespace ContouringScript
 
         public void Create()
         {
+            Logger.WriteInfo("\tExternalStructureCreator: Create");
+
             try
             {
                 Structure ptv = StructureSet.GetStructure(Config.PtvAllName);

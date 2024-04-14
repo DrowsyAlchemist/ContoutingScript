@@ -8,7 +8,7 @@ using VMS.TPS.Common.Model.API;
 
 [assembly: ESAPIScript(IsWriteable = true)]
 
-namespace ContouringScript
+namespace Contouring
 {
     public class Program
     {
@@ -61,31 +61,29 @@ namespace ContouringScript
             if (Patient.CanModifyData() == false)
                 throw new Exception("The program can not modify data.");
 
+            var cleaner = new Cleaner();
+            var targetStructuresCreator = new TargetStructuresCreator();
+            var ringCreator = new RingCreator();
+            var externalStructureCreatornew = new ExternalStructureCreator();
+            var croppedOrgansCreator = new CroppedOrgansCreator();
+
             Patient.BeginModifications();
 
-            Logger.WriteInfo("\tCleaner:");
-            var cleaner = new Cleaner();
             cleaner.CropStructuresByBody();
-
-            Logger.WriteInfo("\tTargetStructuresCreator:");
-            var targetStructuresCreator = new TargetStructuresCreator();
             targetStructuresCreator.Create();
-            targetStructuresCreator.CreatePtvOptMinus();//////
 
-            Logger.WriteInfo("\tRingCreator:");
-            var ringCreator = new RingCreator();
+            if (GetPermition("Do you need PtvOptMinus?"))
+                targetStructuresCreator.CreatePtvOptMinus();
+
             ringCreator.Create();
-
-            Logger.WriteInfo("\tExternalStructureCreator:");
-            new ExternalStructureCreator().Create();
-
-            Logger.WriteInfo("\tCroppedOrgansCreator:");
-            var croppedOrgansCreator = new CroppedOrgansCreator();
+            externalStructureCreatornew.Create();
             croppedOrgansCreator.Create();
-            croppedOrgansCreator.CreateBodyMinusPtv(ringCreator.OuterMarginInMM);//////
 
-            Logger.WriteInfo("\tCleaner:");
+            if (GetPermition("Do you need BodyMinusPtv?"))
+                croppedOrgansCreator.CreateBodyMinusPtv(ringCreator.OuterMarginInMM);
+
             cleaner.RemoveUnnecessaryEmptyStructures();
+
             Application.SaveModifications();
         }
 
@@ -112,6 +110,25 @@ namespace ContouringScript
                     return structureSet;
 
             throw new Exception("Valid StructureSet is not found.");
+        }
+
+        private static bool GetPermition(string text)
+        {
+            Console.WriteLine(text);
+            var key = Console.ReadKey();
+
+            switch (key.Key)
+            {
+                case ConsoleKey.Y:
+                    return true;
+                case ConsoleKey.N:
+                    return false;
+                case ConsoleKey.Enter:
+                    return false;
+                default:
+                    GetPermition(text);
+                    return false;
+            }
         }
     }
 }

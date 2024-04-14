@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ContouringScript
+namespace Contouring
 {
     static class Logger
     {

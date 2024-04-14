@@ -2,7 +2,7 @@
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
-namespace ContouringScript
+namespace Contouring
 {
     public class CroppedOrgansCreator
     {
@@ -23,6 +23,7 @@ namespace ContouringScript
 
         public void Create()
         {
+            Logger.WriteInfo("\tCroppedOrgansCreator: Create");
             Structure[] organs = GetOrgans();
 
             for (int i = 0; i < organs.Length; i++)

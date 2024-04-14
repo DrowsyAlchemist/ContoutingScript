@@ -1,7 +1,7 @@
 ﻿using System;
 using VMS.TPS.Common.Model.API;
 
-namespace ContouringScript
+namespace Contouring
 {
     public class RingCreator
     {
@@ -17,6 +17,8 @@ namespace ContouringScript
 
         public void Create()
         {
+            Logger.WriteInfo("\tRingCreator: Create");
+
             try
             {
                 SetMargins();

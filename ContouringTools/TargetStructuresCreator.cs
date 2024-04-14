@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
-namespace ContouringScript
+namespace Contouring
 {
     public class TargetStructuresCreator
     {
@@ -18,6 +18,7 @@ namespace ContouringScript
 
         public void Create()
         {
+            Logger.WriteInfo("\tTargetStructuresCreator: Create");
             try
             {
                 CreatePtvs();
@@ -34,6 +35,7 @@ namespace ContouringScript
 
         public void CreatePtvOptMinus()
         {
+            Logger.WriteInfo("\tTargetStructuresCreator: CreatePtvOptMinus");
             try
             {
                 Structure ptvOpt = StructureSet.GetStructure(Config.PtvOptName);

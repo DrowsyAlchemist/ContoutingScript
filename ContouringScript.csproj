@@ -52,16 +52,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cleaner.cs" />
+    <Compile Include="ContouringTools\Cleaner.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="CroppedOrgansCreator.cs" />
-    <Compile Include="ExternalStructureCreator.cs" />
-    <Compile Include="RingCreator.cs" />
+    <Compile Include="ContouringTools\CroppedOrgansCreator.cs" />
+    <Compile Include="ContouringTools\ExternalStructureCreator.cs" />
+    <Compile Include="ContouringTools\RingCreator.cs" />
     <Compile Include="ContouringScript.cs" />
-    <Compile Include="StructuresCropper.cs" />
+    <Compile Include="ContouringTools\StructuresCropper.cs" />
     <Compile Include="StructureSetExtentions.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="TargetStructuresCreator.cs" />
+    <Compile Include="ContouringTools\TargetStructuresCreator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
