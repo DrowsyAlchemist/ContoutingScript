@@ -2,7 +2,7 @@
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
-namespace Contouring
+namespace Contouring.Extentions
 {
     static class StructureSetExtentions
     {
@@ -45,9 +45,9 @@ namespace Contouring
                 Logger.WriteInfo($"Structure \"{name}\" has been added.");
                 return structure;
             }
-            catch
+            catch (Exception error)
             {
-                throw new Exception($"Structure \"{name}\" can not be added.");
+                throw new Exception($"Structure \"{name}\" can not be added.\n {error}");
             }
         }
 
@@ -55,14 +55,37 @@ namespace Contouring
         {
             foreach (var structure in structureSet.Structures)
             {
-                if (structure.Id.ToLower().StartsWith("ctv")
-                        && structure.IsEmpty == false
-                        && structureSet.CanRemoveStructure(structure)
-                        && structureSet.HasCalculatedPlan() == false)
+                if (structure.Id.ToLower().StartsWith(Config.CtvType.ToLower()) == false)
+                    continue;
+
+                Console.WriteLine($"Ctv found: {structure.Id}");
+
+
+                if (structure.IsEmpty)
                 {
-                    Logger.WriteInfo($"Valid StructureSet: \"{structureSet.Id}\"");
-                    return true;
+                    Console.WriteLine($"{structure.Id} is empty.");
+                    continue;
                 }
+                Console.WriteLine($"{structure.Id} is not empty.");
+
+
+                if (structureSet.CanRemoveStructure(structure) == false)
+                {
+                    Console.WriteLine($"Script is NOT able to remove {structure.Id}.");
+                    return false;
+                }
+                Console.WriteLine($"Script is able to remove {structure.Id}.");
+
+
+                if (structureSet.HasCalculatedPlan())
+                {
+                    Console.WriteLine($"{structureSet.Id} has calculated plan.");
+                    return false;
+                }
+                Console.WriteLine("Has not calculated plans");
+
+                Logger.WriteInfo($"Valid StructureSet: \"{structureSet.Id}\"");
+                return true;
             }
             return false;
         }

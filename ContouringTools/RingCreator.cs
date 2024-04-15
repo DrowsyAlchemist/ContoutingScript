@@ -1,18 +1,20 @@
-﻿using System;
+﻿using Contouring.Extentions;
+using System;
 using VMS.TPS.Common.Model.API;
 
-namespace Contouring
+namespace Contouring.Tools
 {
     public class RingCreator
     {
+        private readonly StructuresCropper _cropperByPtv;
         private uint _innerMarginInMM;
 
         public uint OuterMarginInMM { get; private set; }
-        private Application Application => Program.Application;
         private StructureSet StructureSet => Program.StructureSet;
 
-        public RingCreator()
+        public RingCreator(CroppersFactory croppersFactory)
         {
+            _cropperByPtv = croppersFactory.Create(StructureNames.PtvAll);
         }
 
         public void Create()
@@ -22,14 +24,12 @@ namespace Contouring
             try
             {
                 SetMargins();
-                Structure ptv = StructureSet.GetStructure(Config.PtvAllName);
-                Structure body = StructureSet.GetStructure(Config.BodyName);
-                Structure ring = StructureSet.GetOrCreateStructure(Config.RingName);
-                var cropperByPtv = new StructuresCropper(ptv);
+                Structure ptv = StructureSet.GetStructure(StructureNames.PtvAll);
+                Structure body = StructureSet.GetStructure(StructureNames.Body);
+                Structure ring = StructureSet.GetOrCreateStructure(StructureNames.SupportivePrefix + StructureNames.Ring);
                 ring.SegmentVolume = ptv.Margin(OuterMarginInMM);
-                ring.SegmentVolume = cropperByPtv.Crop(ring, _innerMarginInMM);
+                ring.SegmentVolume = _cropperByPtv.Crop(ring, _innerMarginInMM);
                 ring.SegmentVolume = ring.And(body);
-                Application.SaveModifications();
             }
             catch (Exception e)
             {

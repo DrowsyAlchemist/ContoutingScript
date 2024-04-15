@@ -1,24 +1,21 @@
-﻿using System;
+﻿using Contouring.Extentions;
+using System;
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
-namespace Contouring
+namespace Contouring.Tools
 {
     public class CroppedOrgansCreator
     {
-        private readonly StructuresCropper _cropperByPTV = null;
+        private readonly StructuresCropper _cropperByPTV;
+        private readonly StructuresCropper _cropperByBody;
 
-        private Application Application => Program.Application;
         private StructureSet StructureSet => Program.StructureSet;
 
-        public CroppedOrgansCreator()
+        public CroppedOrgansCreator(CroppersFactory croppersFactory)
         {
-            Structure ptv = StructureSet.GetStructure(Config.PtvAllName);
-
-            if (ptv.IsEmpty)
-                throw new Exception($"{Config.PtvAllName} is empty.");
-
-            _cropperByPTV = new StructuresCropper(ptv);
+            _cropperByPTV = croppersFactory.Create(StructureNames.PtvAll);
+            _cropperByBody = croppersFactory.Create(StructureNames.Body);
         }
 
         public void Create()
@@ -37,21 +34,38 @@ namespace Contouring
                     Logger.WriteError($"Can not crop {organs[i].Id}:\n{error}\n");
                 }
             }
-            Application.SaveModifications();
         }
 
         public void CreateBodyMinusPtv(uint marginInMM)
         {
+            Logger.WriteInfo("\tCroppedOrgansCreator: CreateBodyMinusPtv");
+
             try
             {
-                Structure body = StructureSet.GetStructure(Config.BodyName);
-                Structure bodyMinusPTV = StructureSet.GetOrCreateStructure(Config.BodyMinusPtvName);
+                Structure body = StructureSet.GetStructure(StructureNames.Body);
+                Structure bodyMinusPTV = StructureSet.GetOrCreateStructure(StructureNames.SupportivePrefix + StructureNames.BodyMinusPtv);
                 bodyMinusPTV.SegmentVolume = _cropperByPTV.Crop(body, marginInMM);
-                Application.SaveModifications();
             }
             catch (Exception)
             {
-                Logger.WriteError($"Can not create \"{Config.BodyMinusPtvName}\"");
+                Logger.WriteError($"Can not create \"{StructureNames.BodyMinusPtv}\"");
+            }
+        }
+
+        public void CropShoulder()
+        {
+            Logger.WriteInfo("\tCroppedOrgansCreator: CropShoulder");
+
+            try
+            {
+                Structure shoulder = StructureSet.GetStructure(StructureNames.Shoulder);
+                _cropperByPTV.Crop(shoulder, Config.OrgansCropMarginFromPtv);
+                shoulder.SegmentVolume = _cropperByPTV.Crop(shoulder, Config.ShouderMarginFromPtv);
+                shoulder.SegmentVolume = _cropperByBody.Crop(shoulder, Config.ShouderMarginFromBody, removePartInside: false);
+            }
+            catch (Exception error)
+            {
+                Logger.WriteWarning($"Can not crop shoulder.\n" + error);
             }
         }
 
@@ -59,8 +73,8 @@ namespace Contouring
         {
             return StructureSet.Structures
                 .Where(s => s.DicomType == Config.OrgansType)
-                .Where(s => s.Id.ToLower().StartsWith(Config.CropPrefix.ToLower()) == false)
-                .Where(s => s.Id.ToLower().Equals(Config.BonesName.ToLower()) == false)
+                .Where(s => s.Id.ToLower().StartsWith(StructureNames.SupportivePrefix.ToLower()) == false)
+                .Where(s => s.Id.ToLower().Equals(StructureNames.Bones.ToLower()) == false)
                 .Where(s => s.Id.ToLower().StartsWith(Config.CtvType.ToLower()) == false)
                 .Where(s => s.Id.ToLower().StartsWith(Config.PtvType.ToLower()) == false)
                 .ToArray();
@@ -74,7 +88,7 @@ namespace Contouring
             if (organ.IsHighResolution)
                 throw new Exception($"{organ.Id} is high resolution.");
 
-            croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, Config.CropMargin);
+            croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, Config.OrgansCropMarginFromPtv);
 
             if (IsValidCroppedVolume(organ, croppedOrgan) == false)
                 RemoveCroppedOrgan(croppedOrgan);
@@ -82,7 +96,7 @@ namespace Contouring
 
         private string GetCroppedOrganName(string initialOrganName)
         {
-            string croppedOrganName = Config.CropPrefix + initialOrganName + Config.CropPostfix;
+            string croppedOrganName = StructureNames.SupportivePrefix + initialOrganName + StructureNames.CropPostfix;
 
             if (croppedOrganName.Length > 16)
                 croppedOrganName = croppedOrganName.Substring(0, 10) + croppedOrganName.Substring(croppedOrganName.Length - 6);
@@ -94,11 +108,11 @@ namespace Contouring
         {
             double croppedVolumeInPercents = croppedOrgan.Volume / initialOrgan.Volume * 100;
 
-            if (croppedVolumeInPercents > Config.CropVolumeTrashholdInPercents)
+            if (croppedVolumeInPercents > Config.CropVolumeThresholdInPercents)
                 return true;
 
             Logger.WriteWarning($"\"{initialOrgan.Id}\" cropped volume is {croppedVolumeInPercents}. " +
-                $"Trashold is {Config.CropVolumeTrashholdInPercents}%.");
+                $"Threshold is {Config.CropVolumeThresholdInPercents}%.");
 
             return false;
         }

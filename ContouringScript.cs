@@ -1,8 +1,10 @@
 using System;
 using System.Reflection;
 using VMS.TPS.Common.Model.API;
+using Contouring.Tools;
+using Contouring.Extentions;
 
-[assembly: AssemblyVersion("3.0.0.0")]
+[assembly: AssemblyVersion("3.0.1.0")]
 [assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
@@ -12,7 +14,6 @@ namespace Contouring
 {
     public class Program
     {
-        public static Application Application { get; private set; }
         public static Patient Patient { get; private set; }
         public static StructureSet StructureSet { get; private set; }
 
@@ -23,10 +24,14 @@ namespace Contouring
             {
                 using (Application app = Application.CreateApplication())
                 {
-                    Application = app;
                     Patient = OpenPatientById(app);
+
+                    if (Patient.CanModifyData() == false)
+                        throw new Exception("The program can not modify data.");
+
+                    Patient.BeginModifications();
                     StructureSet = FindStructureSet(Patient);
-                    Execute();
+                    Execute(app);
                 }
             }
             catch (Exception e)
@@ -37,11 +42,12 @@ namespace Contouring
             Console.ReadKey(true);
         }
 
-        public static void Execute()
+        public static void Execute(Application application)
         {
             try
             {
                 Conture();
+                application.SaveModifications();
             }
             catch (Exception error)
             {
@@ -49,42 +55,43 @@ namespace Contouring
             }
             try
             {
-                StructuresCropper.RemoveMarginStructures();
+                CroppersFactory.RemoveCroppersStructures();
             }
             catch { }
-            Application.ClosePatient();
-            Application.Dispose();
+            application.ClosePatient();
+            application.Dispose();
         }
 
         private static void Conture()
         {
-            if (Patient.CanModifyData() == false)
-                throw new Exception("The program can not modify data.");
+            var croppersFactory = new CroppersFactory();
 
-            var cleaner = new Cleaner();
-            var targetStructuresCreator = new TargetStructuresCreator();
-            var ringCreator = new RingCreator();
-            var externalStructureCreatornew = new ExternalStructureCreator();
-            var croppedOrgansCreator = new CroppedOrgansCreator();
+            var cleaner = new Cleaner(croppersFactory);
+            cleaner.CropStructures();
 
-            Patient.BeginModifications();
-
-            cleaner.CropStructuresByBody();
+            var targetStructuresCreator = new TargetStructuresCreator(croppersFactory);
             targetStructuresCreator.Create();
 
             if (GetPermition("Do you need PtvOptMinus?"))
                 targetStructuresCreator.CreatePtvOptMinus();
 
+            var ringCreator = new RingCreator(croppersFactory);
             ringCreator.Create();
-            externalStructureCreatornew.Create();
+
+            var externalStructureCreator = new ExternalStructureCreator();
+            externalStructureCreator.Create();
+
+            var croppedOrgansCreator = new CroppedOrgansCreator(croppersFactory);
             croppedOrgansCreator.Create();
+            croppedOrgansCreator.CropShoulder();
 
             if (GetPermition("Do you need BodyMinusPtv?"))
                 croppedOrgansCreator.CreateBodyMinusPtv(ringCreator.OuterMarginInMM);
 
-            cleaner.RemoveUnnecessaryEmptyStructures();
+            var prvCreator = new PrvCreator(targetStructuresCreator.MarginFromCtv);
+            prvCreator.Create();
 
-            Application.SaveModifications();
+            cleaner.RemoveUnnecessaryEmptyStructures();
         }
 
         private static Patient OpenPatientById(Application application)
@@ -114,17 +121,14 @@ namespace Contouring
 
         private static bool GetPermition(string text)
         {
-            Console.WriteLine(text);
+            Console.WriteLine(text + Config.PermissionDialogText);
             var key = Console.ReadKey();
+            Console.WriteLine();
 
             switch (key.Key)
             {
                 case ConsoleKey.Y:
                     return true;
-                case ConsoleKey.N:
-                    return false;
-                case ConsoleKey.Enter:
-                    return false;
                 default:
                     GetPermition(text);
                     return false;

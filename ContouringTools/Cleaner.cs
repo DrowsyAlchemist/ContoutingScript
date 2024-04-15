@@ -2,18 +2,16 @@
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
-namespace Contouring
+namespace Contouring.Tools
 {
     public class Cleaner
     {
         private readonly StructuresCropper _cropperByBody;
-        private Application Application => Program.Application;
         private StructureSet StructureSet => Program.StructureSet;
 
-        public Cleaner()
+        public Cleaner(CroppersFactory croppersFactory)
         {
-            Structure body = StructureSet.GetStructure(Config.BodyName);
-            _cropperByBody = new StructuresCropper(structureByWhichCrop: body);
+            _cropperByBody = croppersFactory.Create(structureByWhichCropName: StructureNames.Body);
         }
 
         public void RemoveUnnecessaryEmptyStructures()
@@ -41,12 +39,11 @@ namespace Contouring
             }
         }
 
-        public void CropStructuresByBody()
+        public void CropStructures()
         {
             Logger.WriteInfo("\tCleaner: CropStructuresByBody");
             CropByBody(Config.OrgansType, Config.OrganFromBodyMargin);
             CropByBody(Config.CtvType, Config.TargetFromBody);
-            Application.SaveModifications();
         }
 
         private void CropByBody(string dicomType, uint marginInMM)
@@ -78,8 +75,8 @@ namespace Contouring
         {
             return StructureSet.Structures
                 .Where(s => s.IsEmpty)
-                .Where(s => s.Id.ToLower().Contains(Config.PRVName.ToLower()) == false)
-                .Where(s => s.Id.ToLower().Contains(Config.ShoulderName.ToLower()) == false)
+                .Where(s => s.Id.ToLower().Contains(StructureNames.PrvPostfix.ToLower()) == false)
+                .Where(s => s.Id.ToLower().Contains(StructureNames.Shoulder.ToLower()) == false)
                 .DefaultIfEmpty()
                 .ToArray();
         }

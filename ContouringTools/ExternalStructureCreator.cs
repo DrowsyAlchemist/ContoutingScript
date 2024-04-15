@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Contouring.Extentions;
+using System;
 using VMS.TPS.Common.Model.API;
 
-namespace Contouring
+namespace Contouring.Tools
 {
     public class ExternalStructureCreator
     {
-        private Application Application => Program.Application;
         private StructureSet StructureSet => Program.StructureSet;
 
         public ExternalStructureCreator()
@@ -18,10 +18,10 @@ namespace Contouring
 
             try
             {
-                Structure ptv = StructureSet.GetStructure(Config.PtvAllName);
-                Structure body = StructureSet.GetStructure(Config.BodyName);
+                Structure ptv = StructureSet.GetStructure(StructureNames.PtvAll);
+                Structure body = StructureSet.GetStructure(StructureNames.Body);
 
-                Structure external = StructureSet.GetOrCreateStructure(Config.ExternalName);
+                Structure external = StructureSet.GetOrCreateStructure(StructureNames.SupportivePrefix + StructureNames.External);
                 external.SegmentVolume = ptv.Margin(Config.ExternalOutMargin);
                 external.SegmentVolume = external.Sub(body);
 
@@ -37,8 +37,6 @@ namespace Contouring
 
                 if (external.CanConvertToHighResolution())
                     external.ConvertToHighResolution();
-
-                Application.SaveModifications();
             }
             catch (Exception error)
             {
