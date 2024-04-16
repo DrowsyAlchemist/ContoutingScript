@@ -6,6 +6,7 @@ namespace Contouring.Tools
 {
     public class RingCreator
     {
+        private const uint MaxMargin = 100;
         private readonly StructuresCropper _cropperByPtv;
         private uint _innerMarginInMM;
 
@@ -43,6 +44,12 @@ namespace Contouring.Tools
             _innerMarginInMM = GetMarginFromConsole();
             Console.Write("Outer Ring margin in mm: ");
             OuterMarginInMM = GetMarginFromConsole();
+
+            if (OuterMarginInMM < _innerMarginInMM)
+            {
+                Logger.WriteError("Outer margin should be greater than inner.");
+                SetMargins();
+            }
         }
 
         private uint GetMarginFromConsole()
@@ -57,6 +64,11 @@ namespace Contouring.Tools
                 if (marginInMM <= 0)
                 {
                     Logger.WriteError("Margin should be positive integer.");
+                    isCorrect = false;
+                }
+                if (marginInMM > MaxMargin)
+                {
+                    Logger.WriteError($"Margin should be less then {MaxMargin} mm.");
                     isCorrect = false;
                 }
             }

@@ -73,8 +73,8 @@ namespace Contouring.Tools
         {
             return StructureSet.Structures
                 .Where(s => s.DicomType == Config.OrgansType)
-                .Where(s => s.Id.ToLower().StartsWith(StructureNames.SupportivePrefix.ToLower()) == false)
-                .Where(s => s.Id.ToLower().Equals(StructureNames.Bones.ToLower()) == false)
+                .Where(s => s.Id.StartsWith(StructureNames.SupportivePrefix) == false)
+                .Where(s => s.Id.Equals(StructureNames.Bones) == false)
                 .Where(s => s.Id.ToLower().StartsWith(Config.CtvType.ToLower()) == false)
                 .Where(s => s.Id.ToLower().StartsWith(Config.PtvType.ToLower()) == false)
                 .ToArray();
@@ -91,7 +91,10 @@ namespace Contouring.Tools
             croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, Config.OrgansCropMarginFromPtv);
 
             if (IsValidCroppedVolume(organ, croppedOrgan) == false)
-                RemoveCroppedOrgan(croppedOrgan);
+            {
+                Logger.WriteInfo($"Structure \"{croppedOrgan.Id}\"({croppedOrgan.Volume} cm2) has been removed.");
+                StructureSet.RemoveStructure(croppedOrgan);
+            }
         }
 
         private string GetCroppedOrganName(string initialOrganName)
@@ -106,21 +109,15 @@ namespace Contouring.Tools
 
         private bool IsValidCroppedVolume(Structure initialOrgan, Structure croppedOrgan)
         {
-            double croppedVolumeInPercents = croppedOrgan.Volume / initialOrgan.Volume * 100;
+            double croppedVolumeInPercents = (1 - croppedOrgan.Volume / initialOrgan.Volume) * 100;
+
+            Logger.WriteWarning($"\"{initialOrgan.Id}\" cropped volume is {croppedVolumeInPercents}.\n" +
+                $"Threshold is {Config.CropVolumeThresholdInPercents}%.");
 
             if (croppedVolumeInPercents > Config.CropVolumeThresholdInPercents)
                 return true;
 
-            Logger.WriteWarning($"\"{initialOrgan.Id}\" cropped volume is {croppedVolumeInPercents}. " +
-                $"Threshold is {Config.CropVolumeThresholdInPercents}%.");
-
             return false;
-        }
-
-        private void RemoveCroppedOrgan(Structure croppedOrgan)
-        {
-            StructureSet.RemoveStructure(croppedOrgan);
-            Logger.WriteWarning($"Structure \"{croppedOrgan.Id}\"({croppedOrgan.Volume}) has been removed.");
         }
     }
 }

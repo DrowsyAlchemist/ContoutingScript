@@ -10,7 +10,7 @@ namespace Contouring.Extentions
             SegmentVolume result = combinedStructure.SegmentVolume;
 
             foreach (var structure in structures)
-                result = combinedStructure.Or(structure);
+                result = result.Or(structure);
 
             return result;
         }

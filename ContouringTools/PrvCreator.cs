@@ -26,7 +26,7 @@ namespace Contouring.Tools
                 try
                 {
                     Structure organForPrv = StructureSet.GetStructure(organName);
-                    Structure prv = StructureSet.AddStructure(Config.OrgansType, SupportivePrefix + organName + PrvPostfix);
+                    Structure prv = StructureSet.GetOrCreateStructure(SupportivePrefix + organName + PrvPostfix, Config.OrgansType);
                     prv.SegmentVolume = organForPrv.Margin(_margin);
                 }
                 catch (Exception error)

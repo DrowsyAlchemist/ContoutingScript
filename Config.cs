@@ -11,7 +11,7 @@
         public static uint TargetFromBody { get; private set; } = 1;
 
         public static uint OrgansCropMarginFromPtv { get; private set; } = 3;
-        public static uint ShouderMarginFromPtv { get; private set; } = 25;
+        public static uint ShouderMarginFromPtv { get; private set; } = 35;
         public static uint ShouderMarginFromBody { get; private set; } = 0;
         public static double CropVolumeThresholdInPercents { get; private set; } = 3;
         public static double PtvOptThresholdInPercents { get; private set; } = 3;

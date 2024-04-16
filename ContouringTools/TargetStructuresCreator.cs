@@ -121,7 +121,10 @@ namespace Contouring.Tools
                 optStructure.SegmentVolume = _cropperByBody.Crop(fromStructure, Config.TargetFromBody, removePartInside: false);
 
                 if (IsOptVolumeValid(fromStructure, optStructure) == false)
+                {
+                    Logger.WriteInfo($"\"{optName}\" has been removed.");
                     StructureSet.RemoveStructure(optStructure);
+                }
             }
             catch (Exception error)
             {
@@ -131,7 +134,7 @@ namespace Contouring.Tools
 
         private string GetOptName(string from)
         {
-            if (from.ToLower().Contains(StructureNames.PtvAll))
+            if (from.Contains(StructureNames.PtvAll))
                 return StructureNames.PtvOpt;
             else
                 return from + StructureNames.OptPostfix;
@@ -141,7 +144,7 @@ namespace Contouring.Tools
         {
             double volumeDifferenceInPercents = (1 - opt.Volume / from.Volume) * 100;
 
-            Logger.WriteWarning($"From {from.Id} ({from.Volume}) create {opt.Id} ({opt.Volume}). " +
+            Logger.WriteWarning($"Created {opt.Id} ({opt.Volume}) from {from.Id} ({from.Volume}).\n" +
                 $"Difference: {volumeDifferenceInPercents}. Threshold: {Config.PtvOptThresholdInPercents}");
 
             return volumeDifferenceInPercents > Config.PtvOptThresholdInPercents;

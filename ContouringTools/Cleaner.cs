@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
@@ -14,36 +15,38 @@ namespace Contouring.Tools
             _cropperByBody = croppersFactory.Create(structureByWhichCropName: StructureNames.Body);
         }
 
-        public void RemoveUnnecessaryEmptyStructures()
-        {
-            Logger.WriteInfo("\tCleaner: RemoveUnnecessaryEmptyStructures");
-            Structure[] structuresToRemove = GetUnnecessaryEmptyStructures();
-
-            if (structuresToRemove == null || structuresToRemove.Length == 0)
-            {
-                Logger.WriteWarning($"There are no unnecessary empty structures.");
-                return;
-            }
-
-            foreach (var structure in structuresToRemove)
-            {
-                if (StructureSet.CanRemoveStructure(structure))
-                {
-                    StructureSet.RemoveStructure(structure);
-                    Logger.WriteWarning($"Structure \"{structure.Id}\" has been removed.");
-                }
-                else
-                {
-                    Logger.WriteError($"Structure \"{structure.Id}\" can not be removed.");
-                }
-            }
-        }
-
         public void CropStructures()
         {
             Logger.WriteInfo("\tCleaner: CropStructuresByBody");
             CropByBody(Config.OrgansType, Config.OrganFromBodyMargin);
             CropByBody(Config.CtvType, Config.TargetFromBody);
+        }
+
+        public void RemoveUnnecessaryEmptyStructures()
+        {
+            Logger.WriteInfo("\tCleaner: RemoveUnnecessaryEmptyStructures");
+            List<Structure> structuresToRemove = GetUnnecessaryEmptyStructures();
+
+            if (structuresToRemove.Count == 0)
+            {
+                Logger.WriteInfo($"There are no unnecessary empty structures.");
+                return;
+            }
+            while (structuresToRemove.Count > 0)
+            {
+                Structure structureToRemove = structuresToRemove[0];
+
+                if (StructureSet.CanRemoveStructure(structureToRemove))
+                {
+                    Logger.WriteInfo($"Empty structure \"{structureToRemove.Id}\" has been removed.");
+                    structuresToRemove.RemoveAt(0);
+                    StructureSet.RemoveStructure(structureToRemove);
+                }
+                else
+                {
+                    Logger.WriteError($"Empty structure \"{structureToRemove.Id}\" can not be removed.");
+                }
+            }
         }
 
         private void CropByBody(string dicomType, uint marginInMM)
@@ -71,14 +74,22 @@ namespace Contouring.Tools
             }
         }
 
-        private Structure[] GetUnnecessaryEmptyStructures()
+        private List<Structure> GetUnnecessaryEmptyStructures()
         {
-            return StructureSet.Structures
-                .Where(s => s.IsEmpty)
-                .Where(s => s.Id.ToLower().Contains(StructureNames.PrvPostfix.ToLower()) == false)
-                .Where(s => s.Id.ToLower().Contains(StructureNames.Shoulder.ToLower()) == false)
-                .DefaultIfEmpty()
-                .ToArray();
+            var unnecessaryEmptyStructures = new List<Structure>();
+
+            foreach (Structure structure in StructureSet.Structures)
+                if (IsUnnecessary(structure))
+                    unnecessaryEmptyStructures.Add(structure);
+
+            return unnecessaryEmptyStructures;
+        }
+
+        private bool IsUnnecessary(Structure structure)
+        {
+            return structure.IsEmpty
+                      && structure.Id.Contains(StructureNames.PrvPostfix) == false
+                      && structure.Id.Contains(StructureNames.Shoulder) == false;
         }
     }
 }

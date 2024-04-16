@@ -4,7 +4,7 @@ using VMS.TPS.Common.Model.API;
 using Contouring.Tools;
 using Contouring.Extentions;
 
-[assembly: AssemblyVersion("3.0.1.0")]
+[assembly: AssemblyVersion("3.0.2.3")]
 [assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
@@ -14,6 +14,7 @@ namespace Contouring
 {
     public class Program
     {
+        private static Application _application;
         public static Patient Patient { get; private set; }
         public static StructureSet StructureSet { get; private set; }
 
@@ -22,44 +23,23 @@ namespace Contouring
         {
             try
             {
-                using (Application app = Application.CreateApplication())
+                using (Application application = Application.CreateApplication())
                 {
-                    Patient = OpenPatientById(app);
-
-                    if (Patient.CanModifyData() == false)
-                        throw new Exception("The program can not modify data.");
-
-                    Patient.BeginModifications();
-                    StructureSet = FindStructureSet(Patient);
-                    Execute(app);
+                    _application = application;
+                    Patient = OpenPatientById(application);
+                    InitializePatient(Patient);
+                    StructureSet = FindValidStructureSet(Patient);
+                    Conture();
+                    application.SaveModifications();
                 }
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine(e.ToString());
+                Logger.WriteError(e.ToString());
             }
+            CloseSession(_application);
             Console.WriteLine("The program has completed.\nPress any key...");
             Console.ReadKey(true);
-        }
-
-        public static void Execute(Application application)
-        {
-            try
-            {
-                Conture();
-                application.SaveModifications();
-            }
-            catch (Exception error)
-            {
-                Logger.WriteError(error.ToString());
-            }
-            try
-            {
-                CroppersFactory.RemoveCroppersStructures();
-            }
-            catch { }
-            application.ClosePatient();
-            application.Dispose();
         }
 
         private static void Conture()
@@ -92,6 +72,7 @@ namespace Contouring
             prvCreator.Create();
 
             cleaner.RemoveUnnecessaryEmptyStructures();
+            croppersFactory.RemoveCroppersStructures();
         }
 
         private static Patient OpenPatientById(Application application)
@@ -110,7 +91,15 @@ namespace Contouring
             return patient;
         }
 
-        private static StructureSet FindStructureSet(Patient patient)
+        private static void InitializePatient(Patient patient)
+        {
+            if (patient.CanModifyData() == false)
+                throw new Exception("The program can not modify data.");
+
+            patient.BeginModifications();
+        }
+
+        private static StructureSet FindValidStructureSet(Patient patient)
         {
             foreach (var structureSet in patient.StructureSets)
                 if (structureSet.IsValid())
@@ -133,6 +122,13 @@ namespace Contouring
                     GetPermition(text);
                     return false;
             }
+        }
+
+        private static void CloseSession(Application application)
+        {
+            try { application.ClosePatient(); }
+            catch { }
+            finally { application.Dispose(); }
         }
     }
 }

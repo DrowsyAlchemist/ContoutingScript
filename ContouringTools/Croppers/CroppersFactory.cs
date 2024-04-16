@@ -7,42 +7,43 @@ namespace Contouring.Tools
 {
     public class CroppersFactory
     {
-        private const string MarginStructureName = "Margin structure";
-        private static readonly Dictionary<string, StructuresCropper> _croppers = new Dictionary<string, StructuresCropper>();
+        private const string MarginStructureName = "MarginStr";
+        private readonly Dictionary<string, StructuresCropper> _croppers = new Dictionary<string, StructuresCropper>();
 
-        private static StructureSet StructureSet => Program.StructureSet;
+        private StructureSet StructureSet => Program.StructureSet;
 
         public StructuresCropper Create(string structureByWhichCropName)
         {
             if (_croppers.ContainsKey(structureByWhichCropName) == false)
             {
                 Structure structure = StructureSet.GetStructure(structureByWhichCropName);
-                StructuresCropper cropper = new StructuresCropper(structure, MarginStructureName + "_" + _croppers.Count);
+                var cropper = new StructuresCropper(structure, StructureNames.SupportivePrefix + MarginStructureName + "_" + _croppers.Count);
                 _croppers.Add(structureByWhichCropName, cropper);
                 return cropper;
             }
             return _croppers[structureByWhichCropName];
         }
 
-        public static void RemoveCroppersStructures()
+        public void RemoveCroppersStructures()
         {
-            var marginStructures = StructureSet.Structures.Where(s => s.Id.Contains(MarginStructureName)).ToArray();
-            Logger.WriteWarning($"There are {marginStructures.Length} margin structures.");
+            Logger.WriteInfo("CroppersFactory: RemoveCroppersStructures");
+            var marginStructures = StructureSet.Structures.Where(s => s.Id.Contains(MarginStructureName)).ToList();
+            Logger.WriteWarning($"There are {marginStructures.Count} margin structures.");
 
-            foreach (var marginStructure in marginStructures)
-                RemoveMarginStructure(marginStructure);
-        }
+            while (marginStructures.Count > 0)
+            {
+                Structure marginStructure = marginStructures[0];
 
-        private static void RemoveMarginStructure(Structure marginStructure)
-        {
-            if (StructureSet.CanRemoveStructure(marginStructure))
-            {
-                StructureSet.RemoveStructure(marginStructure);
-                Logger.WriteInfo($"{marginStructure.Id} has been removed.");
-            }
-            else
-            {
-                Logger.WriteError($"Can not remove {marginStructure.Id}.");
+                if (StructureSet.CanRemoveStructure(marginStructure))
+                {
+                    Logger.WriteInfo($"{marginStructure.Id} has been removed.");
+                    marginStructures.RemoveAt(0);
+                    StructureSet.RemoveStructure(marginStructure);
+                }
+                else
+                {
+                    Logger.WriteError($"Can not remove {marginStructure.Id}.");
+                }
             }
         }
     }

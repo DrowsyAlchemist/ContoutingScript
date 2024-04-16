@@ -58,33 +58,22 @@ namespace Contouring.Extentions
                 if (structure.Id.ToLower().StartsWith(Config.CtvType.ToLower()) == false)
                     continue;
 
-                Console.WriteLine($"Ctv found: {structure.Id}");
-
-
                 if (structure.IsEmpty)
-                {
-                    Console.WriteLine($"{structure.Id} is empty.");
                     continue;
-                }
-                Console.WriteLine($"{structure.Id} is not empty.");
-
 
                 if (structureSet.CanRemoveStructure(structure) == false)
                 {
-                    Console.WriteLine($"Script is NOT able to remove {structure.Id}.");
+                    Console.WriteLine($"\"{structureSet.Id}\" is not valid: Script is NOT able to remove {structure.Id}.");
                     return false;
                 }
-                Console.WriteLine($"Script is able to remove {structure.Id}.");
-
 
                 if (structureSet.HasCalculatedPlan())
                 {
-                    Console.WriteLine($"{structureSet.Id} has calculated plan.");
+                    Console.WriteLine($"\"{structureSet.Id}\" is not valid: It has calculated plan.");
                     return false;
                 }
-                Console.WriteLine("Has not calculated plans");
 
-                Logger.WriteInfo($"Valid StructureSet: \"{structureSet.Id}\"");
+                Logger.WriteInfo($"Valid StructureSet is found: \"{structureSet.Id}\"");
                 return true;
             }
             return false;

@@ -28,7 +28,7 @@ namespace Contouring.Tools
                 if (external.IsEmpty)
                 {
                     StructureSet.RemoveStructure(external);
-                    Logger.WriteWarning("External structure is not needed.");
+                    Logger.WriteInfo("External structure is not needed.");
                     return;
                 }
                 external.SegmentVolume = external.Margin(Config.ExternalMarginIntoBody);
