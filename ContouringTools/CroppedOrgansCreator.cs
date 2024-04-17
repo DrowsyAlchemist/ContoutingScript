@@ -59,9 +59,9 @@ namespace Contouring.Tools
             try
             {
                 Structure shoulder = StructureSet.GetStructure(StructureNames.Shoulder);
-                _cropperByPTV.Crop(shoulder, Config.OrgansCropMarginFromPtv);
-                shoulder.SegmentVolume = _cropperByPTV.Crop(shoulder, Config.ShouderMarginFromPtv);
-                shoulder.SegmentVolume = _cropperByBody.Crop(shoulder, Config.ShouderMarginFromBody, removePartInside: false);
+                _cropperByPTV.Crop(shoulder, Config.CroppedOrgansFromPtvMargin);
+                shoulder.SegmentVolume = _cropperByPTV.Crop(shoulder, Config.ShoulderFromPtvMargin);
+                shoulder.SegmentVolume = _cropperByBody.Crop(shoulder, Config.ShouderIntoBodyMargin, removePartInside: false);
             }
             catch (Exception error)
             {
@@ -88,11 +88,11 @@ namespace Contouring.Tools
             if (organ.IsHighResolution)
                 throw new Exception($"{organ.Id} is high resolution.");
 
-            croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, Config.OrgansCropMarginFromPtv);
+            croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, Config.CroppedOrgansFromPtvMargin);
 
             if (IsValidCroppedVolume(organ, croppedOrgan) == false)
             {
-                Logger.WriteInfo($"Structure \"{croppedOrgan.Id}\"({croppedOrgan.Volume} cm2) has been removed.");
+                Logger.WriteInfo($"Structure \"{croppedOrgan.Id}\"({croppedOrgan.Volume:F1} cm2) has been removed.");
                 StructureSet.RemoveStructure(croppedOrgan);
             }
         }
@@ -111,8 +111,8 @@ namespace Contouring.Tools
         {
             double croppedVolumeInPercents = (1 - croppedOrgan.Volume / initialOrgan.Volume) * 100;
 
-            Logger.WriteWarning($"\"{initialOrgan.Id}\" cropped volume is {croppedVolumeInPercents}.\n" +
-                $"Threshold is {Config.CropVolumeThresholdInPercents}%.");
+            Logger.WriteWarning($"\"{initialOrgan.Id}\" cropped volume is {croppedVolumeInPercents:F1} %.\n" +
+                $"Threshold is {Config.CropVolumeThresholdInPercents:F1} %.");
 
             if (croppedVolumeInPercents > Config.CropVolumeThresholdInPercents)
                 return true;

@@ -4,7 +4,7 @@ using VMS.TPS.Common.Model.API;
 using Contouring.Tools;
 using Contouring.Extentions;
 
-[assembly: AssemblyVersion("3.0.2.3")]
+[assembly: AssemblyVersion("3.0.3.0")]
 [assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
@@ -23,6 +23,9 @@ namespace Contouring
         {
             try
             {
+                ConfigParser.SetConfig(typeof(StructureNames));
+                ConfigParser.SetConfig(typeof(Config));
+
                 using (Application application = Application.CreateApplication())
                 {
                     _application = application;
@@ -110,25 +113,73 @@ namespace Contouring
 
         private static bool GetPermition(string text)
         {
-            Console.WriteLine(text + Config.PermissionDialogText);
-            var key = Console.ReadKey();
-            Console.WriteLine();
-
-            switch (key.Key)
+            while (true)
             {
-                case ConsoleKey.Y:
-                    return true;
-                default:
-                    GetPermition(text);
-                    return false;
+                Console.WriteLine(text + " (Press Y to accept or N to refuse)");
+                var key = Console.ReadKey();
+                Console.WriteLine();
+
+                switch (key.Key)
+                {
+                    case ConsoleKey.Y:
+                        return true;
+                    case ConsoleKey.N:
+                        return false;
+                    default:
+                        Logger.WriteError("Incorrect input.");
+                        break;
+                }
             }
         }
 
         private static void CloseSession(Application application)
         {
+            if (application == null)
+                return;
+
             try { application.ClosePatient(); }
             catch { }
             finally { application.Dispose(); }
         }
+
+        //private static void SetConfig()
+        //{
+        //    string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        //    string[] files = Directory.GetFiles(path);
+        //    string cfgFile = null;
+
+        //    foreach (var fileName in files)
+        //    {
+        //        if (fileName.Contains(".cfg"))
+        //            cfgFile = fileName;
+        //    }
+
+        //    if (cfgFile == null)
+        //    {
+        //            List<string> lines = null;
+
+
+        //        using (FileStream fileStream = File.Create($"{path}/Config.cfg"))
+        //        {
+
+
+
+
+        //        }
+        //    }
+
+        //    if (cfgFile != null)
+        //    {
+        //        string[] lines = File.ReadAllLines(cfgFile);
+        //        FieldInfo[] configFields = typeof(Config).GetFields();
+
+        //        foreach (var field in configFields)
+        //        {
+        //            foreach (var line in lines)
+        //                if (field.Name.Equals(line))
+        //                    field.SetValue(typeof(Config), line.Split('=')[1]);
+        //        }
+        //    }
+        //}
     }
 }

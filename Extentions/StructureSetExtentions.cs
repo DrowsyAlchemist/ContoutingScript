@@ -63,7 +63,7 @@ namespace Contouring.Extentions
 
                 if (structureSet.CanRemoveStructure(structure) == false)
                 {
-                    Console.WriteLine($"\"{structureSet.Id}\" is not valid: Script is NOT able to remove {structure.Id}.");
+                    Logger.WriteWarning($"\"{structureSet.Id}\" is not valid: Script is NOT able to remove {structure.Id}.");
                     return false;
                 }
 
@@ -73,10 +73,15 @@ namespace Contouring.Extentions
                     return false;
                 }
 
-                Logger.WriteInfo($"Valid StructureSet is found: \"{structureSet.Id}\"");
+                Logger.WriteWarning($"Valid StructureSet is found: \"{structureSet.Id}\"");
                 return true;
             }
             return false;
+        }
+
+        public static bool Contains(this StructureSet structureSet, string structureName)
+        {
+            return structureSet.Structures.Any(s => s.Id.Equals(structureName));
         }
 
         private static bool HasCalculatedPlan(this StructureSet structureSet)

@@ -52,8 +52,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigParser\ConfigParser.cs" />
     <Compile Include="ContouringTools\Cleaner.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="ConfigParser\Config.cs" />
     <Compile Include="ContouringTools\CroppedOrgansCreator.cs" />
     <Compile Include="ContouringTools\Croppers\CroppersFactory.cs" />
     <Compile Include="ContouringTools\ExternalStructureCreator.cs" />
@@ -62,7 +63,7 @@
     <Compile Include="ContouringTools\Croppers\StructuresCropper.cs" />
     <Compile Include="ContouringTools\PrvCreator.cs" />
     <Compile Include="Extentions\StructureExtentions.cs" />
-    <Compile Include="StructureNames.cs" />
+    <Compile Include="ConfigParser\StructureNames.cs" />
     <Compile Include="Extentions\StructureSetExtentions.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ContouringTools\TargetStructuresCreator.cs" />

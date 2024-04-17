@@ -40,13 +40,19 @@ namespace Contouring.Tools
         public void CreatePtvOptMinus()
         {
             Logger.WriteInfo("\tTargetStructuresCreator: CreatePtvOptMinus");
+
             try
             {
-                Structure ptvOpt = StructureSet.GetStructure(StructureNames.PtvOpt);
-                StructuresCropper cropperByCtv = _croppersFactory.Create(StructureNames.CtvAll);
+                Structure ptv;
 
+                if (StructureSet.Contains(StructureNames.PtvOpt))
+                    ptv = StructureSet.GetStructure(StructureNames.PtvOpt);
+                else
+                    ptv = StructureSet.GetStructure(StructureNames.PtvAll);
+
+                StructuresCropper cropperByCtv = _croppersFactory.Create(StructureNames.CtvAll);
                 Structure ptvOptMinus = StructureSet.GetOrCreateStructure(StructureNames.PtvOptMinus, dicomType: Config.PtvType);
-                ptvOptMinus.SegmentVolume = ptvOpt.Margin(-1 * Config.OptMinusInnerMargin);
+                ptvOptMinus.SegmentVolume = ptv.Margin(-1 * Config.OptMinusInnerMargin);
                 ptvOptMinus.SegmentVolume = cropperByCtv.Crop(ptvOptMinus, Config.OptMinusMarginFromCtv, removePartInside: true);
             }
             catch (Exception error)
@@ -118,7 +124,7 @@ namespace Contouring.Tools
                 Structure fromStructure = StructureSet.GetStructure(from);
                 string optName = GetOptName(from);
                 var optStructure = StructureSet.GetOrCreateStructure(optName, dicomType: Config.PtvType);
-                optStructure.SegmentVolume = _cropperByBody.Crop(fromStructure, Config.TargetFromBody, removePartInside: false);
+                optStructure.SegmentVolume = _cropperByBody.Crop(fromStructure, Config.CtvIntoBodyMargin, removePartInside: false);
 
                 if (IsOptVolumeValid(fromStructure, optStructure) == false)
                 {
@@ -144,8 +150,8 @@ namespace Contouring.Tools
         {
             double volumeDifferenceInPercents = (1 - opt.Volume / from.Volume) * 100;
 
-            Logger.WriteWarning($"Created {opt.Id} ({opt.Volume}) from {from.Id} ({from.Volume}).\n" +
-                $"Difference: {volumeDifferenceInPercents}. Threshold: {Config.PtvOptThresholdInPercents}");
+            Logger.WriteWarning($"Created {opt.Id} ({opt.Volume:F1}) from {from.Id} ({from.Volume:F1}).\n" +
+                $"Difference: {volumeDifferenceInPercents:F1} %. Threshold: {Config.PtvOptThresholdInPercents:F1} %.");
 
             return volumeDifferenceInPercents > Config.PtvOptThresholdInPercents;
         }

@@ -7,6 +7,11 @@ namespace Contouring.Tools
     class PrvCreator
     {
         private readonly uint _margin;
+        private readonly string[] _organsForPrv = {
+            StructureNames.SpinalCord,
+            StructureNames.Chiasm,
+            StructureNames.BrainStem
+        };
 
         private StructureSet StructureSet => Program.StructureSet;
         private string SupportivePrefix => StructureNames.SupportivePrefix;
@@ -21,7 +26,7 @@ namespace Contouring.Tools
         {
             Logger.WriteInfo("\tPrvCreator: Create");
 
-            foreach (var organName in StructureNames.OrgansForPrv)
+            foreach (var organName in _organsForPrv)
             {
                 try
                 {

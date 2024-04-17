@@ -22,7 +22,7 @@ namespace Contouring.Tools
                 Structure body = StructureSet.GetStructure(StructureNames.Body);
 
                 Structure external = StructureSet.GetOrCreateStructure(StructureNames.SupportivePrefix + StructureNames.External);
-                external.SegmentVolume = ptv.Margin(Config.ExternalOutMargin);
+                external.SegmentVolume = ptv.Margin(Config.ExternalFromBodyMargin);
                 external.SegmentVolume = external.Sub(body);
 
                 if (external.IsEmpty)
@@ -31,7 +31,7 @@ namespace Contouring.Tools
                     Logger.WriteInfo("External structure is not needed.");
                     return;
                 }
-                external.SegmentVolume = external.Margin(Config.ExternalMarginIntoBody);
+                external.SegmentVolume = external.Margin(Config.ExternalIntoBodyMargin);
                 external.SetAssignedHU(Config.ExternalHU);
                 body.SegmentVolume = body.Or(external);
 
