@@ -8,7 +8,7 @@ namespace Contouring
 {
     static class ConfigParser
     {
-        private const string ConfigFileExtention = ".cfg";
+        private const string ConfigFileExtention = ".txt";
         public static void SetConfig(Type configType)
         {
             string fileName = configType.Name + ConfigFileExtention;
@@ -35,7 +35,6 @@ namespace Contouring
             {
                 string value = GetValueFromLines(property.Name, lines);
                 SetValueToProperty(value, property, configType);
-                Logger.WriteWarning(property.Name + " = " + property.GetValue(configType));////
             }
         }
 
@@ -76,6 +75,8 @@ namespace Contouring
                 lines.Add(property.Name + " = " + property.GetValue(typeof(Config)));
 
             File.WriteAllLines(fileFullName, lines);
+            Logger.WriteWarning($"{configType.Name}{ConfigFileExtention} have been created. " +
+                $"Restart the script to make any changes.");
         }
     }
 }

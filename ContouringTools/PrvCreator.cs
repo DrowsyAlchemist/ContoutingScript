@@ -6,38 +6,48 @@ namespace Contouring.Tools
 {
     class PrvCreator
     {
-        private readonly uint _margin;
-        private readonly string[] _organsForPrv = {
-            StructureNames.SpinalCord,
+        private readonly uint _ptvMargin;
+
+        private readonly string[] _headOrgans = {
             StructureNames.Chiasm,
-            StructureNames.BrainStem
+            StructureNames.BrainStem,
+            StructureNames.OpticNerveL,
+            StructureNames.OpticNerveR,
+            StructureNames.LensL,
+            StructureNames.LensR
         };
 
         private StructureSet StructureSet => Program.StructureSet;
         private string SupportivePrefix => StructureNames.SupportivePrefix;
         private string PrvPostfix => StructureNames.PrvPostfix;
 
-        public PrvCreator(uint margin)
+        public PrvCreator(uint ptvMargin)
         {
-            _margin = margin;
+            _ptvMargin = ptvMargin;
         }
 
         public void Create()
         {
             Logger.WriteInfo("\tPrvCreator: Create");
 
-            foreach (var organName in _organsForPrv)
+            CreatePrvFrom(StructureNames.SpinalCord, _ptvMargin);
+            CreatePrvFrom(StructureNames.BrainStem, _ptvMargin);
+
+            foreach (var organName in _headOrgans)
+                CreatePrvFrom(organName, Config.PrvMarginForHeadOrgans);
+        }
+
+        private void CreatePrvFrom(string organName, uint margin)
+        {
+            try
             {
-                try
-                {
-                    Structure organForPrv = StructureSet.GetStructure(organName);
-                    Structure prv = StructureSet.GetOrCreateStructure(SupportivePrefix + organName + PrvPostfix, Config.OrgansType);
-                    prv.SegmentVolume = organForPrv.Margin(_margin);
-                }
-                catch (Exception error)
-                {
-                    Logger.WriteWarning($"Can not create PRV from {organName}.\n" + error);
-                }
+                Structure organForPrv = StructureSet.GetStructure(organName);
+                Structure prv = StructureSet.GetOrCreateStructure(SupportivePrefix + organName + " " + PrvPostfix, StructureNames.OrgansDicomType);
+                prv.SegmentVolume = organForPrv.Margin(margin);
+            }
+            catch (Exception error)
+            {
+                Logger.WriteWarning($"Can not create PRV from {organName}: " + error.Message);
             }
         }
     }

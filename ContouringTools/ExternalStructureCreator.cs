@@ -22,7 +22,7 @@ namespace Contouring.Tools
                 Structure body = StructureSet.GetStructure(StructureNames.Body);
 
                 Structure external = StructureSet.GetOrCreateStructure(StructureNames.SupportivePrefix + StructureNames.External);
-                external.SegmentVolume = ptv.Margin(Config.ExternalFromBodyMargin);
+                external.SegmentVolume = ptv.Margin(Config.ExternalFromPtvMargin);
                 external.SegmentVolume = external.Sub(body);
 
                 if (external.IsEmpty)

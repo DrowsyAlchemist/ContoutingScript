@@ -55,7 +55,7 @@ namespace Contouring.Extentions
         {
             foreach (var structure in structureSet.Structures)
             {
-                if (structure.Id.ToLower().StartsWith(Config.CtvType.ToLower()) == false)
+                if (structure.Id.ToLower().StartsWith(StructureNames.CtvDicomType.ToLower()) == false)
                     continue;
 
                 if (structure.IsEmpty)
@@ -73,7 +73,7 @@ namespace Contouring.Extentions
                     return false;
                 }
 
-                Logger.WriteWarning($"Valid StructureSet is found: \"{structureSet.Id}\"");
+                Logger.WriteInfo($"Valid StructureSet is found: \"{structureSet.Id}\"");
                 return true;
             }
             return false;

@@ -18,8 +18,8 @@ namespace Contouring.Tools
         public void CropStructures()
         {
             Logger.WriteInfo("\tCleaner: CropStructuresByBody");
-            CropByBody(Config.OrgansType, Config.OrgansIntoBodyMargin);
-            CropByBody(Config.CtvType, Config.CtvIntoBodyMargin);
+            CropByBody(StructureNames.OrgansDicomType, Config.OrgansIntoBodyMargin);
+            CropByBody(StructureNames.CtvDicomType, Config.CtvIntoBodyMargin);
         }
 
         public void RemoveUnnecessaryEmptyStructures()

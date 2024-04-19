@@ -21,13 +21,20 @@ namespace Contouring.Tools
         public void Create()
         {
             Logger.WriteInfo("\tCroppedOrgansCreator: Create");
+            uint margin;
+
+            if (Config.UseDefaultOrgansMargin)
+                margin = Config.CroppedOrgansFromPtvMargin;
+            else
+                margin = GetMarginFromConsole();
+
             Structure[] organs = GetOrgans();
 
             for (int i = 0; i < organs.Length; i++)
             {
                 try
                 {
-                    CreateCroppedOrganFrom(organs[i]);
+                    CreateCroppedOrganFrom(organs[i], margin);
                 }
                 catch (Exception error)
                 {
@@ -72,15 +79,15 @@ namespace Contouring.Tools
         private Structure[] GetOrgans()
         {
             return StructureSet.Structures
-                .Where(s => s.DicomType == Config.OrgansType)
+                .Where(s => s.DicomType == StructureNames.OrgansDicomType)
                 .Where(s => s.Id.StartsWith(StructureNames.SupportivePrefix) == false)
                 .Where(s => s.Id.Equals(StructureNames.Bones) == false)
-                .Where(s => s.Id.ToLower().StartsWith(Config.CtvType.ToLower()) == false)
-                .Where(s => s.Id.ToLower().StartsWith(Config.PtvType.ToLower()) == false)
+                .Where(s => s.Id.ToLower().StartsWith(StructureNames.CtvDicomType.ToLower()) == false)
+                .Where(s => s.Id.ToLower().StartsWith(StructureNames.PtvDicomType.ToLower()) == false)
                 .ToArray();
         }
 
-        private void CreateCroppedOrganFrom(Structure organ)
+        private void CreateCroppedOrganFrom(Structure organ, uint marginFromPtv)
         {
             string cropedOrganName = GetCroppedOrganName(organ.Id);
             Structure croppedOrgan = StructureSet.GetOrCreateStructure(cropedOrganName);
@@ -88,7 +95,7 @@ namespace Contouring.Tools
             if (organ.IsHighResolution)
                 throw new Exception($"{organ.Id} is high resolution.");
 
-            croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, Config.CroppedOrgansFromPtvMargin);
+            croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, marginFromPtv);
 
             if (IsValidCroppedVolume(organ, croppedOrgan) == false)
             {
@@ -118,6 +125,25 @@ namespace Contouring.Tools
                 return true;
 
             return false;
+        }
+
+        private uint GetMarginFromConsole()
+        {
+            bool isCorrect = false;
+            uint marginInMM = 0;
+
+            while (isCorrect == false)
+            {
+                Console.Write("Organs from PTV crop margin: ");
+                isCorrect = uint.TryParse(Console.ReadLine(), out marginInMM);
+
+                if (marginInMM <= 0)
+                {
+                    Logger.WriteError("Margin should be positive integer.");
+                    isCorrect = false;
+                }
+            }
+            return marginInMM;
         }
     }
 }

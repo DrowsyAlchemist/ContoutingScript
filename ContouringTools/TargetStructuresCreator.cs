@@ -51,7 +51,7 @@ namespace Contouring.Tools
                     ptv = StructureSet.GetStructure(StructureNames.PtvAll);
 
                 StructuresCropper cropperByCtv = _croppersFactory.Create(StructureNames.CtvAll);
-                Structure ptvOptMinus = StructureSet.GetOrCreateStructure(StructureNames.PtvOptMinus, dicomType: Config.PtvType);
+                Structure ptvOptMinus = StructureSet.GetOrCreateStructure(StructureNames.PtvOptMinus, dicomType: StructureNames.PtvDicomType);
                 ptvOptMinus.SegmentVolume = ptv.Margin(-1 * Config.OptMinusInnerMargin);
                 ptvOptMinus.SegmentVolume = cropperByCtv.Crop(ptvOptMinus, Config.OptMinusMarginFromCtv, removePartInside: true);
             }
@@ -78,7 +78,7 @@ namespace Contouring.Tools
                     Logger.WriteError($"Can not create ptv from \"{ctv.Id}\":\n\t{error}\n");
                 }
             }
-            Structure ptvAll = StructureSet.GetOrCreateStructure(StructureNames.PtvAll, dicomType: Config.PtvType);
+            Structure ptvAll = StructureSet.GetOrCreateStructure(StructureNames.PtvAll, dicomType: StructureNames.PtvDicomType);
             ptvAll.SegmentVolume = ptvAll.Merge(ptvs.ToList());
 
             if (StructureSet.GetStructure(StructureNames.PtvAll).IsEmpty)
@@ -87,8 +87,8 @@ namespace Contouring.Tools
 
         private Structure CreatePtvFromCtv(Structure ctv, uint marginFromCtvInMM)
         {
-            string ptvName = Config.PtvType + ctv.Id.Substring(3);
-            Structure ptv = StructureSet.GetOrCreateStructure(ptvName, dicomType: Config.PtvType);
+            string ptvName = StructureNames.PtvDicomType + ctv.Id.Substring(3);
+            Structure ptv = StructureSet.GetOrCreateStructure(ptvName, dicomType: StructureNames.PtvDicomType);
             ptv.SegmentVolume = ctv.Margin(marginFromCtvInMM);
             return ptv;
         }
@@ -123,7 +123,7 @@ namespace Contouring.Tools
             {
                 Structure fromStructure = StructureSet.GetStructure(from);
                 string optName = GetOptName(from);
-                var optStructure = StructureSet.GetOrCreateStructure(optName, dicomType: Config.PtvType);
+                var optStructure = StructureSet.GetOrCreateStructure(optName, dicomType: StructureNames.PtvDicomType);
                 optStructure.SegmentVolume = _cropperByBody.Crop(fromStructure, Config.CtvIntoBodyMargin, removePartInside: false);
 
                 if (IsOptVolumeValid(fromStructure, optStructure) == false)
@@ -163,7 +163,7 @@ namespace Contouring.Tools
             if (CtvIsHighResolution(ctvs))
                 throw new Exception("Error: CTV is high resolution.");
 
-            Structure ctvAll = StructureSet.GetOrCreateStructure(StructureNames.CtvAll, dicomType: Config.CtvType);
+            Structure ctvAll = StructureSet.GetOrCreateStructure(StructureNames.CtvAll, dicomType: StructureNames.CtvDicomType);
             ctvAll.SegmentVolume = ctvAll.Merge(ctvs);
             ctvs.Add(ctvAll);
             return ctvs;
@@ -174,7 +174,7 @@ namespace Contouring.Tools
             try
             {
                 return StructureSet.Structures
-                    .Where(s => s.Id.ToLower().StartsWith(Config.CtvType.ToLower()))
+                    .Where(s => s.Id.ToLower().StartsWith(StructureNames.CtvDicomType.ToLower()))
                     .Where(s => s.IsEmpty == false)
                     .ToList();
             }

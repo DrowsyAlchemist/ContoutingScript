@@ -40,6 +40,12 @@ namespace Contouring.Tools
 
         private void SetMargins()
         {
+            if (Config.UseDefaultRingMargin)
+            {
+                _innerMarginInMM = Config.RingInnerMargin;
+                OuterMarginInMM = Config.RingOuterMargin;
+                return;
+            }
             Console.Write("Inner Ring margin in mm: ");
             _innerMarginInMM = GetMarginFromConsole();
             Console.Write("Outer Ring margin in mm: ");
