@@ -7,29 +7,33 @@ namespace Contouring.Tools
     public class RingCreator
     {
         private const uint MaxMargin = 100;
-        private readonly StructuresCropper _cropperByPtv;
+        private readonly CroppersFactory _croppersFactory;
         private uint _innerMarginInMM;
+        private uint _outerMarginInMM;
 
-        public uint OuterMarginInMM { get; private set; }
         private StructureSet StructureSet => Program.StructureSet;
 
         public RingCreator(CroppersFactory croppersFactory)
         {
-            _cropperByPtv = croppersFactory.Create(StructureNames.PtvAll);
+            _croppersFactory = croppersFactory;
         }
 
         public void Create()
         {
             Logger.WriteInfo("\tRingCreator: Create");
 
+            if (_innerMarginInMM == 0 && _outerMarginInMM == 0)
+                throw new Exception("Margins for Ring is not set.");
+
+            var cropperByPtv = _croppersFactory.Create(StructureNames.PtvAll);
+
             try
             {
-                SetMargins();
                 Structure ptv = StructureSet.GetStructure(StructureNames.PtvAll);
                 Structure body = StructureSet.GetStructure(StructureNames.Body);
                 Structure ring = StructureSet.GetOrCreateStructure(StructureNames.SupportivePrefix + StructureNames.Ring);
-                ring.SegmentVolume = ptv.Margin(OuterMarginInMM);
-                ring.SegmentVolume = _cropperByPtv.Crop(ring, _innerMarginInMM);
+                ring.SegmentVolume = ptv.Margin(_outerMarginInMM);
+                ring.SegmentVolume = cropperByPtv.Crop(ring, _innerMarginInMM);
                 ring.SegmentVolume = ring.And(body);
             }
             catch (Exception e)
@@ -38,23 +42,27 @@ namespace Contouring.Tools
             }
         }
 
-        private void SetMargins()
+        public void SetMargins(out uint inner, out uint outer)
         {
             if (Config.UseDefaultRingMargin)
             {
-                _innerMarginInMM = Config.RingInnerMargin;
-                OuterMarginInMM = Config.RingOuterMargin;
+                inner = Config.RingInnerMargin;
+                outer = Config.RingOuterMargin;
+                _innerMarginInMM = inner;
+                _outerMarginInMM = outer;
                 return;
             }
             Console.Write("Inner Ring margin in mm: ");
-            _innerMarginInMM = GetMarginFromConsole();
+            inner = GetMarginFromConsole();
             Console.Write("Outer Ring margin in mm: ");
-            OuterMarginInMM = GetMarginFromConsole();
+            outer = GetMarginFromConsole();
+            _innerMarginInMM = inner;
+            _outerMarginInMM = outer;
 
-            if (OuterMarginInMM < _innerMarginInMM)
+            if (outer < inner)
             {
                 Logger.WriteError("Outer margin should be greater than inner.");
-                SetMargins();
+                SetMargins(out inner,out outer);
             }
         }
 

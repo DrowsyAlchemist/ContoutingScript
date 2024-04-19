@@ -22,8 +22,8 @@
         public static uint OrgansIntoBodyMargin { get; private set; } = 0;
         public static uint CtvIntoBodyMargin { get; private set; } = 1;
 
-        public static double CropVolumeThresholdInPercents { get; private set; } = 3;
-        public static double PtvOptThresholdInPercents { get; private set; } = 3;
+        public static double CropVolumeThresholdInPercents { get; private set; } = 1.5;
+        public static double PtvOptThresholdInPercents { get; private set; } = 1.5;
 
         public static double ExternalFromPtvMargin { get; private set; } = 2;
         public static double ExternalIntoBodyMargin { get; private set; } = 1;

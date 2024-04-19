@@ -6,8 +6,6 @@ namespace Contouring.Tools
 {
     class PrvCreator
     {
-        private readonly uint _ptvMargin;
-
         private readonly string[] _headOrgans = {
             StructureNames.Chiasm,
             StructureNames.BrainStem,
@@ -21,17 +19,16 @@ namespace Contouring.Tools
         private string SupportivePrefix => StructureNames.SupportivePrefix;
         private string PrvPostfix => StructureNames.PrvPostfix;
 
-        public PrvCreator(uint ptvMargin)
+        public PrvCreator()
         {
-            _ptvMargin = ptvMargin;
         }
 
-        public void Create()
+        public void Create(uint ptvMargin)
         {
             Logger.WriteInfo("\tPrvCreator: Create");
 
-            CreatePrvFrom(StructureNames.SpinalCord, _ptvMargin);
-            CreatePrvFrom(StructureNames.BrainStem, _ptvMargin);
+            CreatePrvFrom(StructureNames.SpinalCord, ptvMargin);
+            CreatePrvFrom(StructureNames.BrainStem, ptvMargin);
 
             foreach (var organName in _headOrgans)
                 CreatePrvFrom(organName, Config.PrvMarginForHeadOrgans);

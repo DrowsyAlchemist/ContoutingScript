@@ -7,40 +7,48 @@ namespace Contouring.Tools
 {
     public class CroppedOrgansCreator
     {
-        private readonly StructuresCropper _cropperByPTV;
-        private readonly StructuresCropper _cropperByBody;
+        private readonly CroppersFactory _croppersFactory;
+        private uint? _marginFromPtv = null;
 
         private StructureSet StructureSet => Program.StructureSet;
 
         public CroppedOrgansCreator(CroppersFactory croppersFactory)
         {
-            _cropperByPTV = croppersFactory.Create(StructureNames.PtvAll);
-            _cropperByBody = croppersFactory.Create(StructureNames.Body);
+            _croppersFactory = croppersFactory;
         }
 
         public void Create()
         {
             Logger.WriteInfo("\tCroppedOrgansCreator: Create");
-            uint margin;
 
-            if (Config.UseDefaultOrgansMargin)
-                margin = Config.CroppedOrgansFromPtvMargin;
-            else
-                margin = GetMarginFromConsole();
+            if (_marginFromPtv == null)
+                throw new Exception("Margin in not set.");
 
+            uint margin = (uint)_marginFromPtv;
             Structure[] organs = GetOrgans();
+            var cropperByPtv = _croppersFactory.Create(StructureNames.PtvAll);
 
             for (int i = 0; i < organs.Length; i++)
             {
                 try
                 {
-                    CreateCroppedOrganFrom(organs[i], margin);
+                    CreateCroppedOrganFrom(organs[i], margin, cropperByPtv);
                 }
                 catch (Exception error)
                 {
                     Logger.WriteError($"Can not crop {organs[i].Id}:\n{error}\n");
                 }
             }
+        }
+
+        public uint SetMargin()
+        {
+            if (Config.UseDefaultOrgansMargin)
+                _marginFromPtv = Config.CroppedOrgansFromPtvMargin;
+            else
+                _marginFromPtv = GetMarginFromConsole();
+
+            return (uint)_marginFromPtv;
         }
 
         public void CreateBodyMinusPtv(uint marginInMM)
@@ -51,7 +59,7 @@ namespace Contouring.Tools
             {
                 Structure body = StructureSet.GetStructure(StructureNames.Body);
                 Structure bodyMinusPTV = StructureSet.GetOrCreateStructure(StructureNames.SupportivePrefix + StructureNames.BodyMinusPtv);
-                bodyMinusPTV.SegmentVolume = _cropperByPTV.Crop(body, marginInMM);
+                bodyMinusPTV.SegmentVolume = _croppersFactory.Create(StructureNames.PtvAll).Crop(body, marginInMM);
             }
             catch (Exception)
             {
@@ -66,9 +74,10 @@ namespace Contouring.Tools
             try
             {
                 Structure shoulder = StructureSet.GetStructure(StructureNames.Shoulder);
-                _cropperByPTV.Crop(shoulder, Config.CroppedOrgansFromPtvMargin);
-                shoulder.SegmentVolume = _cropperByPTV.Crop(shoulder, Config.ShoulderFromPtvMargin);
-                shoulder.SegmentVolume = _cropperByBody.Crop(shoulder, Config.ShouderIntoBodyMargin, removePartInside: false);
+                var cropperByPtv = _croppersFactory.Create(StructureNames.PtvAll);
+                var cropperByBody = _croppersFactory.Create(StructureNames.Body);
+                shoulder.SegmentVolume = cropperByPtv.Crop(shoulder, Config.ShoulderFromPtvMargin);
+                shoulder.SegmentVolume = cropperByBody.Crop(shoulder, Config.ShouderIntoBodyMargin, removePartInside: false);
             }
             catch (Exception error)
             {
@@ -87,7 +96,7 @@ namespace Contouring.Tools
                 .ToArray();
         }
 
-        private void CreateCroppedOrganFrom(Structure organ, uint marginFromPtv)
+        private void CreateCroppedOrganFrom(Structure organ, uint marginFromPtv, StructuresCropper cropper)
         {
             string cropedOrganName = GetCroppedOrganName(organ.Id);
             Structure croppedOrgan = StructureSet.GetOrCreateStructure(cropedOrganName);
@@ -95,7 +104,7 @@ namespace Contouring.Tools
             if (organ.IsHighResolution)
                 throw new Exception($"{organ.Id} is high resolution.");
 
-            croppedOrgan.SegmentVolume = _cropperByPTV.Crop(organ, marginFromPtv);
+            croppedOrgan.SegmentVolume = cropper.Crop(organ, marginFromPtv);
 
             if (IsValidCroppedVolume(organ, croppedOrgan) == false)
             {

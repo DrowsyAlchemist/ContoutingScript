@@ -4,7 +4,7 @@ using VMS.TPS.Common.Model.API;
 using Contouring.Tools;
 using Contouring.Extentions;
 
-[assembly: AssemblyVersion("3.0.4.0")]
+[assembly: AssemblyVersion("3.0.5.1")]
 [assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
@@ -48,38 +48,41 @@ namespace Contouring
         private static void Conture()
         {
             var croppersFactory = new CroppersFactory();
-
             var cleaner = new Cleaner(croppersFactory);
-            cleaner.CropStructures();
-
+            var ringCreator = new RingCreator(croppersFactory);
             var targetStructuresCreator = new TargetStructuresCreator(croppersFactory);
+            var externalStructureCreator = new ExternalStructureCreator();
+            var croppedOrgansCreator = new CroppedOrgansCreator(croppersFactory);
+            var prvCreator = new PrvCreator();
+
+            ringCreator.SetMargins(out uint inner, out uint ringOuterMargin);
+            uint organsMarginFromPtv = croppedOrgansCreator.SetMargin();
+            uint ptvMargin = targetStructuresCreator.SetMargin();
+
+            bool needPtvOptMinus = (Config.OfferPtvOptMinus && GetPermition("Do you need PtvOptMinus?"))
+                || (Config.OfferPtvOptMinus == false && Config.CreatePtvOptMinusByDefault);
+
+            bool needBodyMinusPtv = (Config.OfferBodyMinusPtv && GetPermition("Do you need BodyMinusPtv?"))
+                || (Config.OfferBodyMinusPtv == false && Config.CreateBodyMinusPtvByDefault);
+
+            Console.WriteLine("Processing...");
+            cleaner.CropStructures();
             targetStructuresCreator.Create();
 
-            if (Config.OfferPtvOptMinus && GetPermition("Do you need PtvOptMinus?"))
-                targetStructuresCreator.CreatePtvOptMinus();
-            else if (Config.CreatePtvOptMinusByDefault)
+            if (needPtvOptMinus)
                 targetStructuresCreator.CreatePtvOptMinus();
 
-            var ringCreator = new RingCreator(croppersFactory);
             ringCreator.Create();
-
-            var externalStructureCreator = new ExternalStructureCreator();
             externalStructureCreator.Create();
-
-            var croppedOrgansCreator = new CroppedOrgansCreator(croppersFactory);
             croppedOrgansCreator.Create();
+
+            if (needBodyMinusPtv)
+                croppedOrgansCreator.CreateBodyMinusPtv(ringOuterMargin);
 
             if (Config.UseShoulderCropper)
                 croppedOrgansCreator.CropShoulder();
 
-            if (Config.OfferBodyMinusPtv && GetPermition("Do you need BodyMinusPtv?"))
-                croppedOrgansCreator.CreateBodyMinusPtv(ringCreator.OuterMarginInMM);
-            else if (Config.CreateBodyMinusPtvByDefault)
-                croppedOrgansCreator.CreateBodyMinusPtv(ringCreator.OuterMarginInMM);
-
-            var prvCreator = new PrvCreator(targetStructuresCreator.MarginFromCtv);
-            prvCreator.Create();
-
+            prvCreator.Create(ptvMargin);
             cleaner.RemoveUnnecessaryEmptyStructures();
             croppersFactory.RemoveCroppersStructures();
         }
@@ -147,45 +150,5 @@ namespace Contouring
             catch { }
             finally { application.Dispose(); }
         }
-
-        //private static void SetConfig()
-        //{
-        //    string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        //    string[] files = Directory.GetFiles(path);
-        //    string cfgFile = null;
-
-        //    foreach (var fileName in files)
-        //    {
-        //        if (fileName.Contains(".cfg"))
-        //            cfgFile = fileName;
-        //    }
-
-        //    if (cfgFile == null)
-        //    {
-        //            List<string> lines = null;
-
-
-        //        using (FileStream fileStream = File.Create($"{path}/Config.cfg"))
-        //        {
-
-
-
-
-        //        }
-        //    }
-
-        //    if (cfgFile != null)
-        //    {
-        //        string[] lines = File.ReadAllLines(cfgFile);
-        //        FieldInfo[] configFields = typeof(Config).GetFields();
-
-        //        foreach (var field in configFields)
-        //        {
-        //            foreach (var line in lines)
-        //                if (field.Name.Equals(line))
-        //                    field.SetValue(typeof(Config), line.Split('=')[1]);
-        //        }
-        //    }
-        //}
     }
 }

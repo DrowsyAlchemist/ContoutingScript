@@ -10,16 +10,13 @@ namespace Contouring.Tools
     {
         private const uint MarginUpperBoundInMM = 50;
         private readonly CroppersFactory _croppersFactory;
-        private readonly StructuresCropper _cropperByBody;
-
-        public uint MarginFromCtv { get; private set; }
+        private uint? _marginFromCtv;
 
         private StructureSet StructureSet => Program.StructureSet;
 
         public TargetStructuresCreator(CroppersFactory croppersFactory)
         {
             _croppersFactory = croppersFactory;
-            _cropperByBody = croppersFactory.Create(structureByWhichCropName: StructureNames.Body);
         }
 
         public void Create()
@@ -35,6 +32,31 @@ namespace Contouring.Tools
             }
             CreateOpt(from: StructureNames.PtvAll);
             CreateOpt(from: StructureNames.PtvT);
+        }
+
+        public uint SetMargin()
+        {
+            uint marginInMM = 0;
+            bool isCorrectMargin = false;
+
+            while (isCorrectMargin == false)
+            {
+                Console.Write("Ptv margin in mm: ");
+                isCorrectMargin = uint.TryParse(Console.ReadLine(), out marginInMM);
+
+                if (marginInMM <= 0)
+                {
+                    Logger.WriteError("Margin should be positive integer.");
+                    isCorrectMargin = false;
+                }
+                if (marginInMM > MarginUpperBoundInMM)
+                {
+                    Logger.WriteError("Margin should be less than 50 mm.");
+                    isCorrectMargin = false;
+                }
+            }
+            _marginFromCtv = marginInMM;
+            return marginInMM;
         }
 
         public void CreatePtvOptMinus()
@@ -65,13 +87,13 @@ namespace Contouring.Tools
         {
             List<Structure> ctvs = GetCtvs();
             List<Structure> ptvs = new List<Structure>();
-            MarginFromCtv = GetMargin();
+            uint margin = (uint)_marginFromCtv;
 
             foreach (Structure ctv in ctvs)
             {
                 try
                 {
-                    ptvs.Add(CreatePtvFromCtv(ctv, MarginFromCtv));
+                    ptvs.Add(CreatePtvFromCtv(ctv, margin));
                 }
                 catch (Exception error)
                 {
@@ -93,30 +115,6 @@ namespace Contouring.Tools
             return ptv;
         }
 
-        private uint GetMargin()
-        {
-            uint marginInMM = 0;
-            bool isCorrectMargin = false;
-
-            while (isCorrectMargin == false)
-            {
-                Console.Write("Ptv margin in mm: ");
-                isCorrectMargin = uint.TryParse(Console.ReadLine(), out marginInMM);
-
-                if (marginInMM <= 0)
-                {
-                    Logger.WriteError("Margin should be positive integer.");
-                    isCorrectMargin = false;
-                }
-                if (marginInMM > MarginUpperBoundInMM)
-                {
-                    Logger.WriteError("Margin should be less than 50 mm.");
-                    isCorrectMargin = false;
-                }
-            }
-            return marginInMM;
-        }
-
         private void CreateOpt(string from)
         {
             try
@@ -124,7 +122,8 @@ namespace Contouring.Tools
                 Structure fromStructure = StructureSet.GetStructure(from);
                 string optName = GetOptName(from);
                 var optStructure = StructureSet.GetOrCreateStructure(optName, dicomType: StructureNames.PtvDicomType);
-                optStructure.SegmentVolume = _cropperByBody.Crop(fromStructure, Config.CtvIntoBodyMargin, removePartInside: false);
+                var cropperByBody = _croppersFactory.Create(StructureNames.Body);
+                optStructure.SegmentVolume = cropperByBody.Crop(fromStructure, Config.CtvIntoBodyMargin, removePartInside: false);
 
                 if (IsOptVolumeValid(fromStructure, optStructure) == false)
                 {
