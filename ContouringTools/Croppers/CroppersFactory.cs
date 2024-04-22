@@ -27,7 +27,11 @@ namespace Contouring.Tools
         public void RemoveCroppersStructures()
         {
             Logger.WriteInfo("CroppersFactory: RemoveCroppersStructures");
-            var marginStructures = StructureSet.Structures.Where(s => s.Id.Contains(MarginStructureName)).ToList();
+            var marginStructures = new List<Structure>();
+
+            foreach (var cropper in _croppers)
+                marginStructures.Add(cropper.Value.MarginStructure);
+
             Logger.WriteWarning($"There are {marginStructures.Count} margin structures.");
 
             while (marginStructures.Count > 0)

@@ -15,11 +15,17 @@ namespace Contouring.Tools
             _cropperByBody = croppersFactory.Create(structureByWhichCropName: StructureNames.Body);
         }
 
-        public void CropStructures()
+        public void CropStructuresByBody()
         {
             Logger.WriteInfo("\tCleaner: CropStructuresByBody");
-            CropByBody(StructureNames.OrgansDicomType, Config.OrgansIntoBodyMargin);
-            CropByBody(StructureNames.CtvDicomType, Config.CtvIntoBodyMargin);
+
+            foreach (var structure in StructureSet.Structures)
+            {
+                if (TryGetMargin(structure, out uint margin))
+                    CropStructureByBody(structure, margin);
+                else
+                    continue;
+            }
         }
 
         public void RemoveUnnecessaryEmptyStructures()
@@ -49,17 +55,18 @@ namespace Contouring.Tools
             }
         }
 
-        private void CropByBody(string dicomType, uint marginInMM)
+        private bool TryGetMargin(Structure structure, out uint margin)
         {
-            var structures = StructureSet.Structures.Where(s => s.DicomType == dicomType);
+            margin = 0;
 
-            foreach (var structure in structures)
-            {
-                if (structure.IsHighResolution)
-                    Logger.WriteError($"Can not crop \"{structure.Id}\" by body because it's high resolution.");
-                else
-                    CropStructureByBody(structure, marginInMM);
-            }
+            if (structure.DicomType.Equals(StructureNames.OrgansDicomType))
+                margin = Config.OrgansIntoBodyMargin;
+            else if (structure.DicomType.Equals(StructureNames.CtvDicomType))
+                margin = Config.CtvIntoBodyMargin;
+            else
+                return false;
+
+            return true;
         }
 
         private void CropStructureByBody(Structure structure, uint marginInMM)

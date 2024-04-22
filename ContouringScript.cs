@@ -4,7 +4,7 @@ using VMS.TPS.Common.Model.API;
 using Contouring.Tools;
 using Contouring.Extentions;
 
-[assembly: AssemblyVersion("3.0.5.1")]
+[assembly: AssemblyVersion("3.0.5.3")]
 [assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
@@ -55,9 +55,9 @@ namespace Contouring
             var croppedOrgansCreator = new CroppedOrgansCreator(croppersFactory);
             var prvCreator = new PrvCreator();
 
-            ringCreator.SetMargins(out uint inner, out uint ringOuterMargin);
-            uint organsMarginFromPtv = croppedOrgansCreator.SetMargin();
             uint ptvMargin = targetStructuresCreator.SetMargin();
+            uint organsMarginFromPtv = croppedOrgansCreator.SetMargin();
+            ringCreator.SetMargins(out uint inner, out uint ringOuterMargin);
 
             bool needPtvOptMinus = (Config.OfferPtvOptMinus && GetPermition("Do you need PtvOptMinus?"))
                 || (Config.OfferPtvOptMinus == false && Config.CreatePtvOptMinusByDefault);
@@ -66,7 +66,7 @@ namespace Contouring
                 || (Config.OfferBodyMinusPtv == false && Config.CreateBodyMinusPtvByDefault);
 
             Console.WriteLine("Processing...");
-            cleaner.CropStructures();
+            cleaner.CropStructuresByBody();
             targetStructuresCreator.Create();
 
             if (needPtvOptMinus)

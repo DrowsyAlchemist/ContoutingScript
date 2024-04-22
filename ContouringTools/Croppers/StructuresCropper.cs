@@ -6,27 +6,27 @@ namespace Contouring.Tools
 {
     public class StructuresCropper
     {
+        public readonly Structure MarginStructure;
         private readonly Structure _structureByWhichCrop;
-        private readonly Structure _marginStructure;
 
         private StructureSet StructureSet => Program.StructureSet;
 
         public StructuresCropper(Structure structureByWhichCrop, string marginStructureName)
         {
             _structureByWhichCrop = structureByWhichCrop ?? throw new ArgumentNullException(nameof(structureByWhichCrop));
-            _marginStructure = StructureSet.GetOrCreateStructure(marginStructureName);
+            MarginStructure = StructureSet.GetOrCreateStructure(marginStructureName);
         }
 
         public SegmentVolume Crop(Structure structure, uint marginInMM, bool removePartInside = true)
         {
             double cropMargin = marginInMM * (removePartInside ? 1 : -1);
-            _marginStructure.SegmentVolume = _structureByWhichCrop.Margin(cropMargin);
+            MarginStructure.SegmentVolume = _structureByWhichCrop.Margin(cropMargin);
             SegmentVolume croppedVolume;
 
             if (removePartInside)
-                croppedVolume = structure.Sub(_marginStructure);
+                croppedVolume = structure.Sub(MarginStructure);
             else
-                croppedVolume = structure.And(_marginStructure);
+                croppedVolume = structure.And(MarginStructure);
 
             return croppedVolume;
         }
