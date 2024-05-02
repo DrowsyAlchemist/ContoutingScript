@@ -19,6 +19,8 @@
         public static bool OfferPtvOptMinus { get; private set; } = true;
         public static bool CreatePtvOptMinusByDefault { get; private set; } = false;
 
+        public static bool OfferToContinue { get; private set; } = false;
+
         public static uint OrgansIntoBodyMargin { get; private set; } = 0;
         public static uint CtvIntoBodyMargin { get; private set; } = 1;
 

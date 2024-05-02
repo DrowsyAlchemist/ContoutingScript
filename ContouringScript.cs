@@ -4,7 +4,7 @@ using VMS.TPS.Common.Model.API;
 using Contouring.Tools;
 using Contouring.Extentions;
 
-[assembly: AssemblyVersion("3.0.5.3")]
+[assembly: AssemblyVersion("3.0.5.6")]
 [assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
@@ -65,6 +65,13 @@ namespace Contouring
             bool needBodyMinusPtv = (Config.OfferBodyMinusPtv && GetPermition("Do you need BodyMinusPtv?"))
                 || (Config.OfferBodyMinusPtv == false && Config.CreateBodyMinusPtvByDefault);
 
+            if (Config.OfferToContinue)
+            {
+                bool isOk = GetPermition("Continue?");
+
+                if (isOk == false)
+                    throw new Exception("Can not continue.");
+            }
             Console.WriteLine("Processing...");
             cleaner.CropStructuresByBody();
             targetStructuresCreator.Create();

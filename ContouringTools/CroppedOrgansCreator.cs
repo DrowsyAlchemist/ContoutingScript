@@ -130,7 +130,8 @@ namespace Contouring.Tools
             Logger.WriteWarning($"\"{initialOrgan.Id}\" cropped volume is {croppedVolumeInPercents:F1} %.\n" +
                 $"Threshold is {Config.CropVolumeThresholdInPercents:F1} %.");
 
-            if (croppedVolumeInPercents > Config.CropVolumeThresholdInPercents)
+            if (croppedVolumeInPercents > Config.CropVolumeThresholdInPercents
+                || croppedVolumeInPercents < (100 - Config.CropVolumeThresholdInPercents))
                 return true;
 
             return false;
