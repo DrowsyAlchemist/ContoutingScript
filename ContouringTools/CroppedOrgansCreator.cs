@@ -98,12 +98,11 @@ namespace Contouring.Tools
 
         private void CreateCroppedOrganFrom(Structure organ, uint marginFromPtv, StructuresCropper cropper)
         {
-            string cropedOrganName = GetCroppedOrganName(organ.Id);
-            Structure croppedOrgan = StructureSet.GetOrCreateStructure(cropedOrganName);
-
             if (organ.IsHighResolution)
                 throw new Exception($"{organ.Id} is high resolution.");
 
+            string cropedOrganName = GetCroppedOrganName(organ.Id);
+            Structure croppedOrgan = StructureSet.GetOrCreateStructure(cropedOrganName);
             croppedOrgan.SegmentVolume = cropper.Crop(organ, marginFromPtv);
 
             if (IsValidCroppedVolume(organ, croppedOrgan) == false)
@@ -131,7 +130,7 @@ namespace Contouring.Tools
                 $"Threshold is {Config.CropVolumeThresholdInPercents:F1} %.");
 
             if (croppedVolumeInPercents > Config.CropVolumeThresholdInPercents
-                || croppedVolumeInPercents < (100 - Config.CropVolumeThresholdInPercents))
+                 && croppedVolumeInPercents < (100 - Config.CropVolumeThresholdInPercents))
                 return true;
 
             return false;
