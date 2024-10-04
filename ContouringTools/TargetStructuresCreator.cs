@@ -59,23 +59,23 @@ namespace Contouring.Tools
             return marginInMM;
         }
 
-        public void CreatePtvOptMinus()
+        public void CreatePtvOptMinus(uint ptvMargin)
         {
             Logger.WriteInfo("\tTargetStructuresCreator: CreatePtvOptMinus");
 
             try
             {
-                Structure ptv;
+                Structure ptvOptMinus = StructureSet.GetOrCreateStructure(StructureNames.PtvOptMinus, dicomType: StructureNames.PtvDicomType);
+                Structure ctv = StructureSet.GetStructure(StructureNames.CtvAll);
+                ptvOptMinus.SegmentVolume = ctv.Margin(ptvMargin - Config.OptMinusInnerMargin);
+                StructuresCropper cropperByCtv = _croppersFactory.Create(StructureNames.CtvAll);
+                ptvOptMinus.SegmentVolume = cropperByCtv.Crop(ptvOptMinus, Config.OptMinusMarginFromCtv, removePartInside: true);
 
                 if (StructureSet.Contains(StructureNames.PtvOpt))
-                    ptv = StructureSet.GetStructure(StructureNames.PtvOpt);
-                else
-                    ptv = StructureSet.GetStructure(StructureNames.PtvAll);
-
-                StructuresCropper cropperByCtv = _croppersFactory.Create(StructureNames.CtvAll);
-                Structure ptvOptMinus = StructureSet.GetOrCreateStructure(StructureNames.PtvOptMinus, dicomType: StructureNames.PtvDicomType);
-                ptvOptMinus.SegmentVolume = ptv.Margin(-1 * Config.OptMinusInnerMargin);
-                ptvOptMinus.SegmentVolume = cropperByCtv.Crop(ptvOptMinus, Config.OptMinusMarginFromCtv, removePartInside: true);
+                {
+                    StructuresCropper cropperByPtvOpt = _croppersFactory.Create(StructureNames.PtvOpt);
+                    ptvOptMinus.SegmentVolume = cropperByPtvOpt.Crop(ptvOptMinus, 0, removePartInside: true);
+                }
             }
             catch (Exception error)
             {

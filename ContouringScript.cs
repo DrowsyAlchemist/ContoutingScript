@@ -4,7 +4,7 @@ using VMS.TPS.Common.Model.API;
 using Contouring.Tools;
 using Contouring.Extentions;
 
-[assembly: AssemblyVersion("3.0.5.7")]
+[assembly: AssemblyVersion("3.0.6.7")]
 [assembly: AssemblyFileVersion("1.0.0.1")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
@@ -77,7 +77,7 @@ namespace Contouring
             targetStructuresCreator.Create();
 
             if (needPtvOptMinus)
-                targetStructuresCreator.CreatePtvOptMinus();
+                targetStructuresCreator.CreatePtvOptMinus(ptvMargin);
 
             ringCreator.Create();
             externalStructureCreator.Create();
